@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cómo funciona el medidor de la ducha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4fafb;
+    --bg-soft:#e9f4f5;
+    --panel:#ffffff;
+    --ink:#0b2530;
+    --ink-soft:#3d5a63;
+    --teal:#0e7c86;
+    --teal-deep:#0a5860;
+    --teal-pale:#cdeceb;
+    --amber:#e39a3a;
+    --amber-pale:#fbe6c4;
+    --coral:#e2574c;
+    --coral-pale:#fbdad7;
+    --green:#3f9d6f;
+    --green-pale:#d8f0e1;
+    --line:#a9dadb;
+    --shadow: 0 14px 34px -18px rgba(10,60,65,0.35);
+    --radius: 22px;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0a1b23;
+      --bg-soft:#0f242d;
+      --panel:#123039;
+      --ink:#eaf6f6;
+      --ink-soft:#a9c7cb;
+      --teal:#4fc2c9;
+      --teal-deep:#8fe0e2;
+      --teal-pale:#163c42;
+      --amber:#f0b35c;
+      --amber-pale:#3a2c15;
+      --coral:#ef7c72;
+      --coral-pale:#3a1c19;
+      --green:#68caa0;
+      --green-pale:#123626;
+      --line:#1f4d53;
+      --shadow: 0 14px 34px -18px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a1b23;
+    --bg-soft:#0f242d;
+    --panel:#123039;
+    --ink:#eaf6f6;
+    --ink-soft:#a9c7cb;
+    --teal:#4fc2c9;
+    --teal-deep:#8fe0e2;
+    --teal-pale:#163c42;
+    --amber:#f0b35c;
+    --amber-pale:#3a2c15;
+    --coral:#ef7c72;
+    --coral-pale:#3a1c19;
+    --green:#68caa0;
+    --green-pale:#123626;
+    --line:#1f4d53;
+    --shadow: 0 14px 34px -18px rgba(0,0,0,0.6);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth; scroll-padding-top: calc(74px + env(safe-area-inset-top,0px));}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.headline{font-family:'Baloo 2',system-ui,sans-serif; font-weight:700; margin:0;}
+  p{margin:0 0 12px 0; max-width:64ch;}
+  img,svg{max-width:100%;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px;}
+  section{padding:64px 0;}
+  .section-alt{background:var(--bg-soft);}
+
+  /* ---------- top nav ---------- */
+  nav.pillbar{
+    position:sticky; top:0; z-index:50;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    padding-top: env(safe-area-inset-top,0px);
+  }
+  .pillbar-inner{
+    max-width:920px; margin:0 auto; padding:10px 16px;
+    display:flex; gap:8px; overflow-x:auto; scrollbar-width:none;
+  }
+  .pillbar-inner::-webkit-scrollbar{display:none;}
+  .pillbar a{
+    flex:none; text-decoration:none; color:var(--ink-soft);
+    font-size:13.5px; font-weight:600; padding:8px 14px; border-radius:999px;
+    white-space:nowrap; transition:background .15s,color .15s;
+  }
+  .pillbar a.active{background:var(--teal); color:#fff;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:52px 0 40px; position:relative; overflow:hidden;
+    background: linear-gradient(180deg, var(--teal-pale) 0%, var(--bg) 78%);
+  }
+  .hero .wrap{position:relative; z-index:2;}
+  .eyebrow-drop{font-size:38px; line-height:1; margin-bottom:10px; display:inline-block;}
+  .hero h1{font-size:clamp(30px,5.4vw,46px); color:var(--teal-deep); letter-spacing:.2px;}
+  .hero p.lead{font-size:18px; color:var(--ink-soft); max-width:56ch; margin-top:14px;}
+  .hero-wave{position:absolute; left:0; right:0; bottom:-2px; z-index:1;}
+  .flowpath{stroke-dasharray:8 10; animation:dashflow 6s linear infinite;}
+  @keyframes dashflow{ to{ stroke-dashoffset:-180; } }
+  @media (prefers-reduced-motion: reduce){ .flowpath{animation:none;} }
+
+  /* ---------- generic pieces ---------- */
+  .kicker{color:var(--teal); font-weight:700; font-size:14px; margin-bottom:6px;}
+  h2.title{font-size:clamp(24px,3.6vw,32px); color:var(--ink); margin-bottom:10px;}
+  .lede{color:var(--ink-soft); font-size:16.5px; margin-bottom:30px;}
+
+  .card{
+    background:var(--panel); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:22px 24px; border:1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  }
+
+  /* ---------- timeline ---------- */
+  .timeline{position:relative; margin-top:12px;}
+  .timeline::before{
+    content:""; position:absolute; left:23px; top:6px; bottom:6px; width:3px;
+    background-image:linear-gradient(var(--teal), var(--teal) 60%, transparent 60%);
+    background-size:3px 16px; background-repeat:repeat-y;
+  }
+  .tl-item{position:relative; padding:0 0 30px 62px; min-height:1px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-num{
+    position:absolute; left:0; top:0; width:48px; height:48px; border-radius:50%;
+    background:var(--teal); color:#fff; font-family:'Baloo 2',sans-serif; font-weight:700;
+    display:flex; align-items:center; justify-content:center; font-size:19px;
+    box-shadow:0 6px 14px -6px color-mix(in srgb, var(--teal) 70%, transparent);
+  }
+  .tl-item h3{font-size:17px; margin-bottom:4px; color:var(--ink);}
+  .tl-item p{color:var(--ink-soft); font-size:15px; margin-bottom:0;}
+
+  /* ---------- architecture diagram ---------- */
+  .diagram{width:100%; height:auto; margin:8px 0 22px;}
+  .diagram .node-box{fill:var(--panel); stroke:var(--teal); stroke-width:2;}
+  .diagram .node-title{font-family:'Baloo 2',sans-serif; font-weight:700; fill:var(--ink); font-size:15px;}
+  .diagram .node-sub{font-family:'Inter',sans-serif; fill:var(--ink-soft); font-size:11.5px;}
+  .diagram .link-label{font-family:'Inter',sans-serif; fill:var(--teal-deep); font-size:11px; font-weight:600;}
+  .diagram .arrow{stroke:var(--teal); stroke-width:2.4; fill:none;}
+
+  details.tech-card{
+    background:var(--panel); border-radius:16px; padding:6px 20px; margin-bottom:12px;
+    border:1px solid var(--line); box-shadow:var(--shadow);
+  }
+  details.tech-card summary{
+    cursor:pointer; list-style:none; padding:14px 0; font-family:'Baloo 2',sans-serif;
+    font-weight:600; font-size:16.5px; display:flex; align-items:center; gap:10px;
+  }
+  details.tech-card summary::-webkit-details-marker{display:none;}
+  details.tech-card summary .chip{font-size:22px;}
+  details.tech-card summary::after{
+    content:"+"; margin-left:auto; font-size:22px; color:var(--teal); font-weight:700;
+  }
+  details.tech-card[open] summary::after{content:"–";}
+  details.tech-card .tc-body{padding-bottom:16px; color:var(--ink-soft); font-size:15px;}
+  details.tech-card .tc-body b{color:var(--ink);}
+
+  /* ---------- glossary flip cards ---------- */
+  .flip-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:16px;}
+  .flip-card{background:transparent; perspective:1000px; height:160px;}
+  .flip-inner{
+    position:relative; width:100%; height:100%; transition:transform .55s cubic-bezier(.2,.8,.2,1);
+    transform-style:preserve-3d; cursor:pointer;
+  }
+  .flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+  .flip-face{
+    position:absolute; inset:0; border-radius:16px; backface-visibility:hidden;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:14px; box-shadow:var(--shadow);
+  }
+  .flip-front{background:var(--teal); color:#fff; font-family:'Baloo 2',sans-serif; font-size:19px; font-weight:700;}
+  .flip-front span.hint{display:block; font-family:'Inter',sans-serif; font-weight:500; font-size:11.5px; opacity:.85; margin-top:8px;}
+  .flip-back{background:var(--panel); color:var(--ink-soft); font-size:13.5px; transform:rotateY(180deg); border:1px solid var(--line);}
+
+  /* ---------- calculator ---------- */
+  .calc{display:grid; grid-template-columns:1.1fr .9fr; gap:26px;}
+  @media (max-width:680px){.calc{grid-template-columns:1fr;}}
+  .calc-field{margin-bottom:14px;}
+  .calc-field label{display:flex; justify-content:space-between; font-size:13.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;}
+  .calc-field label span.val{color:var(--teal-deep); font-weight:700;}
+  input[type=range]{width:100%; accent-color:var(--teal);}
+  select{
+    width:100%; padding:9px 10px; border-radius:10px; border:1px solid var(--line);
+    background:var(--panel); color:var(--ink); font-family:'Inter',sans-serif; font-size:14px;
+  }
+  .calc-results{background:var(--teal-pale); border-radius:18px; padding:20px;}
+  .res-row{display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; border-bottom:1px dashed var(--line);}
+  .res-row:last-child{border-bottom:none;}
+  .res-row .r-label{font-size:13.5px; color:var(--ink-soft);}
+  .res-row .r-val{font-family:'Baloo 2',sans-serif; font-size:19px; color:var(--teal-deep); font-weight:700;}
+  .calc-note{font-size:12.5px; color:var(--ink-soft); margin-top:10px;}
+
+  /* ---------- matching game ---------- */
+  .match-wrap{position:relative;}
+  .match-game{display:grid; grid-template-columns:1fr 1fr; gap:40px; position:relative; z-index:2;}
+  @media (max-width:600px){.match-game{gap:16px;}}
+  .match-col{display:flex; flex-direction:column; gap:10px;}
+  .match-btn{
+    text-align:left; border-radius:12px; border:2px solid var(--line); background:var(--panel);
+    color:var(--ink); font-family:'Inter',sans-serif; font-size:13.5px; padding:12px 14px;
+    cursor:pointer; transition:border-color .15s, background .15s, transform .1s;
+  }
+  .match-btn.term{font-family:'Baloo 2',sans-serif; font-weight:600; font-size:15px;}
+  .match-btn.selected{border-color:var(--teal); background:var(--teal-pale);}
+  .match-btn.correct{border-color:var(--green); background:var(--green-pale); cursor:default;}
+  .match-btn.wrong{border-color:var(--coral); background:var(--coral-pale); animation:shake .3s;}
+  @keyframes shake{25%{transform:translateX(-4px);} 75%{transform:translateX(4px);}}
+  #matchSvg{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1;}
+  #matchSvg line{stroke:var(--green); stroke-width:2.5; stroke-linecap:round;}
+  .match-status{margin-top:16px; font-weight:600; color:var(--teal-deep); min-height:22px;}
+
+  /* ---------- true/false ---------- */
+  .tf-grid{display:grid; gap:14px;}
+  .tf-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px 18px;
+    box-shadow:var(--shadow); cursor:pointer;
+  }
+  .tf-q{font-weight:600; font-size:15px; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+  .tf-tag{flex:none; font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:var(--bg-soft); color:var(--ink-soft);}
+  .tf-answer{display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); font-size:14px; color:var(--ink-soft);}
+  .tf-card.open .tf-answer{display:block;}
+  .tf-card.open.true .tf-tag{background:var(--green-pale); color:var(--green);}
+  .tf-card.open.false .tf-tag{background:var(--coral-pale); color:var(--coral);}
+
+  /* ---------- quiz ---------- */
+  .quiz-q{background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:18px 20px; margin-bottom:16px; box-shadow:var(--shadow);}
+  .quiz-q h4{font-family:'Baloo 2',sans-serif; font-size:16px; margin-bottom:12px;}
+  .quiz-opts{display:grid; gap:8px;}
+  .quiz-opt{
+    display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:10px;
+    border:1.5px solid var(--line); cursor:pointer; font-size:14.5px; color:var(--ink);
+  }
+  .quiz-opt input{margin-top:3px;}
+  .quiz-opt.correct{border-color:var(--green); background:var(--green-pale);}
+  .quiz-opt.wrong{border-color:var(--coral); background:var(--coral-pale);}
+  .quiz-actions{text-align:center; margin-top:20px;}
+  button.btn-main{
+    background:var(--teal); color:#fff; border:none; padding:13px 28px; border-radius:999px;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; cursor:pointer;
+    box-shadow:0 10px 20px -10px color-mix(in srgb, var(--teal) 70%, transparent);
+  }
+  button.btn-main:active{transform:translateY(1px);}
+  #quizScore{text-align:center; font-family:'Baloo 2',sans-serif; font-size:20px; margin-top:16px; color:var(--teal-deep); min-height:28px;}
+
+  /* ---------- recap footer ---------- */
+  footer{padding:50px 0 60px; background:var(--teal-deep); color:#eafcfc;}
+  footer .wrap{max-width:920px;}
+  footer h2{color:#fff; font-size:24px; margin-bottom:16px;}
+  footer ul{margin:0; padding-left:20px;}
+  footer li{margin-bottom:8px; font-size:15px;}
+  footer .sign{margin-top:26px; font-size:13.5px; opacity:.75;}
+
+  .divider-wave{display:block; width:100%; height:44px;}
+</style>
+</head>
+<body>
+
+<nav class="pillbar">
+  <div class="pillbar-inner" id="pillbar">
+    <a href="#problema">El problema</a>
+    <a href="#pasos">Paso a paso</a>
+    <a href="#arquitectura">Por dentro</a>
+    <a href="#diccionario">Diccionario</a>
+    <a href="#calculadora">Calculadora</a>
+    <a href="#conecta">Conecta</a>
+    <a href="#vof">V o F</a>
+    <a href="#quiz">Quiz</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow-drop">🚿💧</span>
+    <h1>¿Cómo funciona el medidor de agua y energía de la ducha?</h1>
+    <p class="lead">Una guía para entenderlo todo de una sola pasada: el problema que resuelve, cómo se arma por dentro (sensor, celular, servidor), qué significa cada sigla rara y, al final, juegos y preguntas para comprobar que quedó claro.</p>
+  </div>
+  <svg class="hero-wave" viewBox="0 0 1200 90" preserveAspectRatio="none">
+    <path d="M0,40 C200,90 400,0 600,40 C800,80 1000,10 1200,40 L1200,90 L0,90 Z" fill="var(--bg)"></path>
+    <path class="flowpath" d="M0,40 C200,90 400,0 600,40 C800,80 1000,10 1200,40" fill="none" stroke="var(--teal)" stroke-width="2" opacity="0.5"></path>
+  </svg>
+</header>
+
+<!-- ================= EL PROBLEMA ================= -->
+<section id="problema">
+  <div class="wrap">
+    <div class="kicker">01 · Por qué existe esto</div>
+    <h2 class="title">Toda esa agua fría que se va por el desagüe, cuesta plata</h2>
+    <p class="lede">Cuando abres la ducha, pasan segundos (o minutos) hasta que el agua sale caliente. Todo ese tiempo, el agua se pierde y la energía usada para calentarla también. Nadie sabe bien cuánto es, ni si vale la pena instalar un aparato para arreglarlo.</p>
+    <div class="card">
+      <p style="margin-bottom:14px;"><b>El sistema soluciona tres preguntas a la vez:</b></p>
+      <p>💧 <b>¿Cuánta agua se pierde?</b> Litros que caen antes de llegar a la temperatura que quieres.<br>
+      🔥 <b>¿Cuánta energía y plata se van con ella?</b> El gas o la electricidad usados para calentar esa agua que nadie ocupó.<br>
+      🔁 <b>¿Conviene un recirculador?</b> Un aparato que hace circular el agua caliente para que llegue casi de inmediato — se compara lo que cuesta contra lo que se ahorraría.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PASO A PASO ================= -->
+<section id="pasos" class="section-alt">
+  <div class="wrap">
+    <div class="kicker">02 · De la llave al reporte</div>
+    <h2 class="title">Así funciona, paso a paso</h2>
+    <p class="lede">Es una secuencia: cada vez que te duchas, el sistema repite estos siete pasos sin que hagas nada extra.</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-num">1</div><h3>Se instala y se configura</h3><p>El sensor se conecta al celular por Bluetooth o Wi-Fi. La persona elige su temperatura ideal (por ejemplo 38 °C) y si calienta con gas o electricidad.</p></div>
+      <div class="tl-item"><div class="tl-num">2</div><h3>Se abre la llave</h3><p>El sensor nota que empezó a correr agua y la app arranca un cronómetro.</p></div>
+      <div class="tl-item"><div class="tl-num">3</div><h3>Llegan los datos en vivo</h3><p>El sensor envía cuánta agua pasa y a qué temperatura está, y la app lo muestra al instante en pantalla.</p></div>
+      <div class="tl-item"><div class="tl-num">4</div><h3>El agua llega a la temperatura elegida</h3><p>La app frena el cronómetro. Todo lo que cayó hasta ese momento es agua perdida.</p></div>
+      <div class="tl-item"><div class="tl-num">5</div><h3>Se calcula el costo</h3><p>El sistema convierte los litros y la energía perdidos en pesos chilenos.</p></div>
+      <div class="tl-item"><div class="tl-num">6</div><h3>Se guarda en el historial</h3><p>Al cerrar el mes, se suman todas las duchas y se arma el reporte mensual.</p></div>
+      <div class="tl-item"><div class="tl-num">7</div><h3>Llega una recomendación (si corresponde)</h3><p>Si lo perdido supera el límite que definiste, la app sugiere un recirculador y en cuántos meses se pagaría solo.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ARQUITECTURA ================= -->
+<section id="arquitectura">
+  <div class="wrap">
+    <div class="kicker">03 · Lo que corre por dentro</div>
+    <h2 class="title">Cuatro programas hablando entre sí</h2>
+    <p class="lede">No es "una app": son cuatro piezas separadas, cada una en su propio lenguaje, conectadas por cables invisibles de datos. Toca cada tarjeta para abrirla y ver los detalles.</p>
+
+    <svg class="diagram" viewBox="0 0 760 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama: sensor conectado a la app, la app al servidor, el servidor a la base de datos">
+      <rect class="node-box" x="10" y="60" width="150" height="70" rx="14"></rect>
+      <text class="node-title" x="85" y="90" text-anchor="middle">Sensor</text>
+      <text class="node-sub" x="85" y="108" text-anchor="middle">flujo + temperatura</text>
+
+      <rect class="node-box" x="205" y="60" width="150" height="70" rx="14"></rect>
+      <text class="node-title" x="280" y="90" text-anchor="middle">App móvil</text>
+      <text class="node-sub" x="280" y="108" text-anchor="middle">Android / iOS</text>
+
+      <rect class="node-box" x="400" y="60" width="150" height="70" rx="14"></rect>
+      <text class="node-title" x="475" y="90" text-anchor="middle">Servidor</text>
+      <text class="node-sub" x="475" y="108" text-anchor="middle">Node.js (API)</text>
+
+      <rect class="node-box" x="595" y="60" width="155" height="70" rx="14"></rect>
+      <text class="node-title" x="672" y="90" text-anchor="middle">Base de datos</text>
+      <text class="node-sub" x="672" y="108" text-anchor="middle">PostgreSQL</text>
+
+      <path class="arrow flowpath" d="M160,95 H205" marker-end="url(#arrowhead)"></path>
+      <text class="link-label" x="182" y="82" text-anchor="middle">BLE / MQTT</text>
+
+      <path class="arrow flowpath" d="M355,95 H400" marker-end="url(#arrowhead)"></path>
+      <text class="link-label" x="377" y="82" text-anchor="middle">HTTPS</text>
+
+      <path class="arrow flowpath" d="M550,95 H595" marker-end="url(#arrowhead)"></path>
+      <text class="link-label" x="572" y="82" text-anchor="middle">SQL</text>
+
+      <defs>
+        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="var(--teal)"></path>
+        </marker>
+      </defs>
+    </svg>
+
+    <details class="tech-card">
+      <summary><span class="chip">📟</span> Sensor: el que mide de verdad</summary>
+      <div class="tc-body">Es un microcontrolador <b>ESP32</b> (un chip diminuto con Wi-Fi y Bluetooth incorporados) programado en <b>C++</b>. Junta dos piezas: un sensor de caudal que cuenta pulsos de agua (no litros directos) y un sensor de temperatura. El propio sensor convierte esos pulsos en litros por minuto antes de enviarlos.</div>
+    </details>
+    <details class="tech-card">
+      <summary><span class="chip">📶</span> El enlace: cómo viajan los datos</summary>
+      <div class="tc-body">Normalmente por <b>Bluetooth Low Energy (BLE)</b>, una versión de Bluetooth que casi no gasta batería. Si el celular está lejos, el sensor cambia a <b>MQTT</b> por Wi-Fi, un sistema donde el sensor "publica" datos y el servidor, "suscrito", los recibe apenas se publican.</div>
+    </details>
+    <details class="tech-card">
+      <summary><span class="chip">📱</span> App móvil: lo que ves en pantalla</summary>
+      <div class="tc-body">Escrita en <b>Dart</b> con el framework <b>Flutter</b>, que arma la versión Android y iOS desde un mismo código. Calcula los litros y el costo apenas llegan los datos, y guarda un historial local aunque no haya internet.</div>
+    </details>
+    <details class="tech-card">
+      <summary><span class="chip">🖥️</span> Servidor: quien ordena todo</summary>
+      <div class="tc-body">Un backend en <b>Node.js</b> (JavaScript corriendo en un servidor) que expone una API: direcciones web para crear cuentas, guardar duchas y pedir reportes. Confirma quién eres con un <b>token JWT</b> y nunca guarda tu contraseña tal cual, sino cifrada.</div>
+    </details>
+    <details class="tech-card">
+      <summary><span class="chip">🗄️</span> Base de datos: la memoria del sistema</summary>
+      <div class="tc-body"><b>PostgreSQL</b> guarda usuarios, sensores, duchas y tarifas en tablas. El servidor le habla a través de un <b>ORM</b>, una librería que traduce el código directamente en filas y columnas, sin escribir cada consulta a mano.</div>
+    </details>
+  </div>
+</section>
+
+<!-- ================= DICCIONARIO ================= -->
+<section id="diccionario" class="section-alt">
+  <div class="wrap">
+    <div class="kicker">04 · Las siglas, sin misterio</div>
+    <h2 class="title">Diccionario exprés</h2>
+    <p class="lede">Toca cada tarjeta para dar vuelta y ver la respuesta.</p>
+    <div class="flip-grid" id="flipGrid"></div>
+  </div>
+</section>
+
+<!-- ================= CALCULADORA ================= -->
+<section id="calculadora">
+  <div class="wrap">
+    <div class="kicker">05 · Juega con los números</div>
+    <h2 class="title">La fórmula del dinero perdido</h2>
+    <p class="lede">Mueve los controles y mira cómo cambia lo que se pierde. Estas son las mismas cuentas que hace la app en cada ducha.</p>
+    <div class="calc card">
+      <div>
+        <div class="calc-field">
+          <label>Agua que sale por minuto <span class="val" id="v-flow">8 L</span></label>
+          <input type="range" id="flow" min="4" max="16" value="8" step="0.5">
+        </div>
+        <div class="calc-field">
+          <label>Tiempo esperando que salga caliente <span class="val" id="v-wait">60 s</span></label>
+          <input type="range" id="wait" min="10" max="180" value="60" step="5">
+        </div>
+        <div class="calc-field">
+          <label>Temperatura deseada <span class="val" id="v-temp">38 °C</span></label>
+          <input type="range" id="temp" min="30" max="45" value="38" step="1">
+        </div>
+        <div class="calc-field">
+          <label>Duchas al mes en la casa <span class="val" id="v-showers">120</span></label>
+          <input type="range" id="showers" min="30" max="240" value="120" step="10">
+        </div>
+        <div class="calc-field">
+          <label>Cómo se calienta el agua</label>
+          <select id="source">
+            <option value="1|220">Electricidad ($220/kWh, eficiencia 100%)</option>
+            <option value="0.8|115">Gas licuado ($115/kWh, eficiencia 80%)</option>
+          </select>
+        </div>
+      </div>
+      <div class="calc-results">
+        <div class="res-row"><span class="r-label">Litros perdidos por ducha</span><span class="r-val" id="r-liters">–</span></div>
+        <div class="res-row"><span class="r-label">Energía perdida por ducha</span><span class="r-val" id="r-energy">–</span></div>
+        <div class="res-row"><span class="r-label">Costo por ducha</span><span class="r-val" id="r-cost">–</span></div>
+        <div class="res-row"><span class="r-label">Pérdida total al mes</span><span class="r-val" id="r-month">–</span></div>
+        <p class="calc-note">Se calcula igual que en la app: litros = flujo × minutos de espera; energía útil = litros × 0,001163 × (temperatura deseada − 15 °C de agua fría) ÷ eficiencia del calefón.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONECTA LOS CONCEPTOS ================= -->
+<section id="conecta" class="section-alt">
+  <div class="wrap">
+    <div class="kicker">06 · Juego de memoria</div>
+    <h2 class="title">Conecta cada sigla con su significado</h2>
+    <p class="lede">Toca un término a la izquierda y luego su definición a la derecha. Si aciertas, se dibuja una línea entre los dos.</p>
+    <div class="match-wrap card">
+      <svg id="matchSvg"></svg>
+      <div class="match-game" id="matchGame"></div>
+      <div class="match-status" id="matchStatus"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VERDADERO O FALSO ================= -->
+<section id="vof">
+  <div class="wrap">
+    <div class="kicker">07 · Pon a prueba tu intuición</div>
+    <h2 class="title">¿Verdadero o falso?</h2>
+    <p class="lede">Toca cada tarjeta para revelar la respuesta.</p>
+    <div class="tf-grid" id="tfGrid"></div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section id="quiz" class="section-alt">
+  <div class="wrap">
+    <div class="kicker">08 · La prueba final</div>
+    <h2 class="title">¿Quedó claro todo? Compruébalo</h2>
+    <p class="lede">Responde las ocho preguntas y presiona «Revisar respuestas» al final.</p>
+    <div id="quizList"></div>
+    <div class="quiz-actions">
+      <button class="btn-main" id="quizCheck">Revisar respuestas</button>
+      <div id="quizScore"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <h2>Lo esencial, en cinco frases</h2>
+    <ul>
+      <li>El sensor no mide litros directamente: cuenta pulsos y los convierte en litros.</li>
+      <li>Un <b>kWh</b> es la unidad con la que se cobra la energía; el sistema traduce el agua perdida a kWh y luego a pesos.</li>
+      <li>Los datos viajan por <b>Bluetooth (BLE)</b> o, si el celular está lejos, por <b>Wi-Fi con MQTT</b>.</li>
+      <li>El servidor nunca guarda tu contraseña real: la revuelve con <b>bcrypt</b> y te identifica con un <b>token JWT</b>.</li>
+      <li>Un recirculador solo se recomienda cuando lo perdido en el mes supera el límite que tú mismo definiste.</li>
+    </ul>
+    <div class="sign">Guía de estudio — Sistema de Monitoreo de Pérdidas de Agua y Energía en la Ducha</div>
+  </div>
+</footer>
+
+<script>
+/* ---------------- nav highlight ---------------- */
+(function(){
+  var links = document.querySelectorAll('#pillbar a');
+  var sections = Array.prototype.map.call(links, function(a){ return document.querySelector(a.getAttribute('href')); });
+  function onScroll(){
+    var pos = window.scrollY + 110;
+    var current = 0;
+    sections.forEach(function(sec,i){ if(sec && sec.offsetTop <= pos) current = i; });
+    links.forEach(function(a,i){ a.classList.toggle('active', i===current); });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+
+/* ---------------- glossary flip cards ---------------- */
+var GLOSSARY = [
+  ["kWh", "Kilovatio-hora: la unidad con la que se cobra la electricidad y el gas. Equivale a usar 1.000 watts durante una hora seguida."],
+  ["BLE", "Bluetooth de bajo consumo: una versión de Bluetooth pensada para gastar muy poca batería, ideal para sensores pequeños."],
+  ["GATT", "La forma en que un aparato Bluetooth ordena sus datos: los agrupa en «servicios» con «características» adentro, como cajones con etiqueta."],
+  ["MQTT", "Protocolo liviano para enviar datos por Wi-Fi: el sensor «publica» en un canal y quien está «suscrito» a ese canal recibe el mensaje al instante."],
+  ["JWT", "Un token firmado que el servidor entrega al iniciar sesión, para no tener que enviar el usuario y la contraseña en cada pedido."],
+  ["bcrypt", "Una fórmula que revuelve una contraseña de forma que no se puede devolver a la original, y lo hace lenta a propósito para que sea difícil de adivinar."],
+  ["ORM", "Una librería que traduce el código del programador directamente en tablas y filas de una base de datos, sin escribir SQL a mano."],
+  ["REST", "Una forma de organizar una API: cada cosa (usuario, sensor, ducha) tiene su propia dirección y se usa GET, POST, PUT o DELETE sobre ella."],
+  ["TLS / HTTPS", "El candado invisible de internet: cifra todo lo que viaja entre el celular y el servidor para que nadie más lo pueda leer."],
+  ["Interrupción de hardware", "Una forma de avisarle al procesador «pasó algo» al instante, en vez de que él tenga que estar preguntando todo el rato."]
+];
+(function(){
+  var grid = document.getElementById('flipGrid');
+  GLOSSARY.forEach(function(item){
+    var card = document.createElement('div');
+    card.className = 'flip-card';
+    card.innerHTML =
+      '<div class="flip-inner">' +
+        '<div class="flip-face flip-front">'+item[0]+'<span class="hint">toca para ver</span></div>' +
+        '<div class="flip-face flip-back">'+item[1]+'</div>' +
+      '</div>';
+    card.addEventListener('click', function(){ card.classList.toggle('flipped'); });
+    grid.appendChild(card);
+  });
+})();
+
+/* ---------------- calculator ---------------- */
+(function(){
+  var flow = document.getElementById('flow');
+  var wait = document.getElementById('wait');
+  var temp = document.getElementById('temp');
+  var showers = document.getElementById('showers');
+  var source = document.getElementById('source');
+
+  function fmtCLP(n){ return '$' + Math.round(n).toLocaleString('es-CL'); }
+
+  function update(){
+    document.getElementById('v-flow').textContent = flow.value + ' L';
+    document.getElementById('v-wait').textContent = wait.value + ' s';
+    document.getElementById('v-temp').textContent = temp.value + ' °C';
+    document.getElementById('v-showers').textContent = showers.value;
+
+    var parts = source.value.split('|');
+    var efficiency = parseFloat(parts[0]);
+    var pricePerKwh = parseFloat(parts[1]);
+    var priceLiter = 1.5;
+
+    var liters = parseFloat(flow.value) * (parseFloat(wait.value)/60);
+    var energyKwh = liters * 0.001163 * (parseFloat(temp.value) - 15);
+    var waterCost = liters * priceLiter;
+    var energyCost = (energyKwh / efficiency) * pricePerKwh;
+    var totalPerShower = waterCost + energyCost;
+    var monthly = totalPerShower * parseFloat(showers.value);
+
+    document.getElementById('r-liters').textContent = liters.toFixed(1) + ' L';
+    document.getElementById('r-energy').textContent = energyKwh.toFixed(2) + ' kWh';
+    document.getElementById('r-cost').textContent = fmtCLP(totalPerShower);
+    document.getElementById('r-month').textContent = fmtCLP(monthly);
+  }
+  [flow,wait,temp,showers,source].forEach(function(el){ el.addEventListener('input', update); });
+  update();
+})();
+
+/* ---------------- matching game ---------------- */
+var MATCH_PAIRS = [
+  ["kWh", "Unidad con la que se cobra la energía eléctrica y el gas"],
+  ["BLE", "Bluetooth pensado para gastar muy poca batería"],
+  ["MQTT", "El sensor publica datos y el servidor, suscrito, los recibe"],
+  ["JWT", "Token firmado que reemplaza mandar usuario y contraseña siempre"],
+  ["ORM", "Traduce el código directo en tablas de la base de datos"],
+  ["TLS", "Cifra todo lo que viaja entre el celular y el servidor"]
+];
+(function(){
+  var game = document.getElementById('matchGame');
+  var svg = document.getElementById('matchSvg');
+  var status = document.getElementById('matchStatus');
+  var terms = MATCH_PAIRS.map(function(p,i){ return {id:i, text:p[0]}; });
+  var defs = MATCH_PAIRS.map(function(p,i){ return {id:i, text:p[1]}; });
+  defs.sort(function(){ return Math.random()-0.5; });
+
+  var colL = document.createElement('div'); colL.className='match-col';
+  var colR = document.createElement('div'); colR.className='match-col';
+  game.appendChild(colL); game.appendChild(colR);
+
+  terms.forEach(function(t){
+    var b = document.createElement('button');
+    b.className='match-btn term'; b.textContent=t.text; b.dataset.id=t.id; b.dataset.side='term';
+    colL.appendChild(b);
+  });
+  defs.forEach(function(d){
+    var b = document.createElement('button');
+    b.className='match-btn def'; b.textContent=d.text; b.dataset.id=d.id; b.dataset.side='def';
+    colR.appendChild(b);
+  });
+
+  var selectedTerm=null, selectedDef=null, solved=0;
+
+  function checkPair(){
+    if(selectedTerm && selectedDef){
+      var correct = selectedTerm.dataset.id === selectedDef.dataset.id;
+      if(correct){
+        selectedTerm.classList.remove('selected'); selectedTerm.classList.add('correct');
+        selectedDef.classList.remove('selected'); selectedDef.classList.add('correct');
+        drawLine(selectedTerm, selectedDef);
+        solved++;
+        status.textContent = solved===MATCH_PAIRS.length ? '¡Listo! Conectaste los seis conceptos. 🎉' : (solved+' de '+MATCH_PAIRS.length+' conectados.');
+        selectedTerm=null; selectedDef=null;
+      } else {
+        selectedTerm.classList.add('wrong'); selectedDef.classList.add('wrong');
+        var t=selectedTerm, d=selectedDef;
+        setTimeout(function(){
+          t.classList.remove('selected','wrong');
+          d.classList.remove('selected','wrong');
+        }, 420);
+        selectedTerm=null; selectedDef=null;
+      }
+    }
+  }
+
+  function drawLine(elA, elB){
+    var gameRect = game.getBoundingClientRect();
+    var rA = elA.getBoundingClientRect();
+    var rB = elB.getBoundingClientRect();
+    var x1 = rA.right - gameRect.left, y1 = rA.top + rA.height/2 - gameRect.top;
+    var x2 = rB.left - gameRect.left, y2 = rB.top + rB.height/2 - gameRect.top;
+    var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+    svg.appendChild(line);
+  }
+
+  game.addEventListener('click', function(e){
+    var btn = e.target.closest('.match-btn');
+    if(!btn || btn.classList.contains('correct')) return;
+    if(btn.dataset.side==='term'){
+      if(selectedTerm) selectedTerm.classList.remove('selected');
+      selectedTerm = btn; btn.classList.add('selected');
+    } else {
+      if(selectedDef) selectedDef.classList.remove('selected');
+      selectedDef = btn; btn.classList.add('selected');
+    }
+    checkPair();
+  });
+
+  window.addEventListener('resize', function(){
+    svg.innerHTML='';
+    document.querySelectorAll('.match-btn.correct').forEach(function(){});
+  });
+})();
+
+/* ---------------- true / false ---------------- */
+var TF = [
+  ["El sensor mide directamente cuántos litros de agua han pasado.", false, "Mide pulsos eléctricos de una turbina; es el firmware el que los convierte en litros usando una constante de calibración."],
+  ["Un recirculador hace que el agua caliente llegue casi de inmediato a la ducha.", true, "Mantiene el agua caliente circulando por las cañerías, así casi no hay que esperar."],
+  ["Las contraseñas de los usuarios se guardan tal cual las escriben.", false, "Se guardan cifradas con bcrypt, nunca en texto plano."],
+  ["El gas licuado calienta agua con la misma eficiencia que la electricidad.", false, "La electricidad ronda el 100% de eficiencia; el gas, cerca del 80%, porque parte del calor se pierde en el calefón."],
+  ["La app puede seguir mostrando los datos del sensor sin conexión a internet.", true, "El enlace por Bluetooth funciona sin internet; el historial se sincroniza después."],
+  ["Un kWh es una unidad de tiempo, como una hora.", false, "Es una unidad de energía: equivale a gastar 1.000 watts durante una hora."]
+];
+(function(){
+  var grid = document.getElementById('tfGrid');
+  TF.forEach(function(item){
+    var card = document.createElement('div');
+    card.className = 'tf-card';
+    card.innerHTML =
+      '<div class="tf-q"><span>'+item[0]+'</span><span class="tf-tag">Toca para ver</span></div>' +
+      '<div class="tf-answer">'+item[2]+'</div>';
+    card.addEventListener('click', function(){
+      if(card.classList.contains('open')) return;
+      card.classList.add('open', item[1] ? 'true' : 'false');
+      card.querySelector('.tf-tag').textContent = item[1] ? 'Verdadero' : 'Falso';
+    });
+    grid.appendChild(card);
+  });
+})();
+
+/* ---------------- quiz ---------------- */
+var QUIZ = [
+  {q:"¿Qué mide exactamente el sensor de caudal?", opts:["La temperatura del agua","Pulsos generados por el agua que pasa","Directamente los litros","El precio del agua"], correct:1},
+  {q:"¿Para qué sirve el sensor DS18B20?", opts:["Medir el caudal","Medir la temperatura","Enviar correos","Guardar contraseñas"], correct:1},
+  {q:"¿Qué es BLE?", opts:["Un lenguaje de programación","Una base de datos","Bluetooth de bajo consumo de energía","Un tipo de calefón"], correct:2},
+  {q:"¿Qué hace un recirculador?", opts:["Enfría el agua","Hace circular el agua caliente para que llegue rápido","Corta el suministro de agua","Mide la temperatura del agua"], correct:1},
+  {q:"En la fórmula de energía, ¿qué representa el número 0,001163?", opts:["El precio del kWh","La eficiencia del calefón","La energía para subir 1 °C a 1 litro de agua","El caudal promedio de una ducha"], correct:2},
+  {q:"¿Qué hace bcrypt con las contraseñas?", opts:["Las cifra al instante para que no demore nada","Las revuelve y lo hace lento a propósito","Las guarda en texto plano","Las envía por correo a modo de respaldo"], correct:1},
+  {q:"¿Qué protocolo usa el sensor para avisar por Wi-Fi cuando el celular está lejos?", opts:["HTTP","MQTT","FTP","OneWire"], correct:1},
+  {q:"¿Por qué el gas licuado tiene menor eficiencia que la electricidad para calentar agua?", opts:["Porque el gas es más caro","Porque parte del calor del gas se pierde en el calefón","Porque el gas tarda más en llegar a la casa","Porque el agua se enfría más rápido con gas"], correct:1}
+];
+(function(){
+  var list = document.getElementById('quizList');
+  QUIZ.forEach(function(item, qi){
+    var box = document.createElement('div');
+    box.className = 'quiz-q';
+    var optsHtml = item.opts.map(function(opt, oi){
+      return '<label class="quiz-opt" data-q="'+qi+'" data-o="'+oi+'">' +
+        '<input type="radio" name="q'+qi+'" value="'+oi+'"><span>'+opt+'</span></label>';
+    }).join('');
+    box.innerHTML = '<h4>'+(qi+1)+'. '+item.q+'</h4><div class="quiz-opts">'+optsHtml+'</div>';
+    list.appendChild(box);
+  });
+
+  document.getElementById('quizCheck').addEventListener('click', function(){
+    var score = 0;
+    QUIZ.forEach(function(item, qi){
+      var chosen = document.querySelector('input[name="q'+qi+'"]:checked');
+      var labels = document.querySelectorAll('.quiz-opt[data-q="'+qi+'"]');
+      labels.forEach(function(lab){ lab.classList.remove('correct','wrong'); });
+      var correctLabel = document.querySelector('.quiz-opt[data-q="'+qi+'"][data-o="'+item.correct+'"]');
+      if(correctLabel) correctLabel.classList.add('correct');
+      if(chosen){
+        var chosenLabel = document.querySelector('.quiz-opt[data-q="'+qi+'"][data-o="'+chosen.value+'"]');
+        if(parseInt(chosen.value,10) === item.correct){ score++; }
+        else if(chosenLabel){ chosenLabel.classList.add('wrong'); }
+      }
+    });
+    document.getElementById('quizScore').textContent = 'Obtuviste ' + score + ' de ' + QUIZ.length + ' 🎯';
+  });
+})();
+</script>
+</body>
+</html>
